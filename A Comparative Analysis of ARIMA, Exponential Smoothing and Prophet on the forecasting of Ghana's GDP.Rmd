@@ -1,0 +1,339 @@
+**A Comparative Analysis of ARIMA, Exponential Smoothing and Prophet on the Forecasting of Ghana's GDP(1960 - 2023)**
+
+This is a comparison of model performance between traditional Time Series forecasting methods (ARIMA & ETS) and Modern Machine Learning forecasting methods (Prophet) on the Mean Absolute Error (MAE) and Root Mean Square Error (RMSE) evaluation metrics.
+
+Load the necessary packages
+
+```{r}
+library(tibble)
+library(ggplot2)
+library(astsa)
+library(forecast)
+library(tseries)
+library(prophet)
+```
+
+Loading the data
+
+```{r}
+setwd("C:/Users/SamuelAster Agondeze/Documents")
+GDP_Data <- read.csv("Ghana_GDP A.csv")
+```
+
+Converting the loaded GDP data into a Time Series (ts) data type
+
+```{r}
+gdp_ts=ts(GDP_Data$gdp, start=c(1960,1), frequency=1)
+gdp_ts
+```
+
+Explore the Data (Simple Exploratory data analysis)
+
+```{r}
+summary(gdp_ts)
+```
+
+Add the Time Series data into a data frame so that it's easy to plot it in a visual and also split it to to train and test sets
+
+```{r}
+gdp_d.f <- data.frame(
+  Year = as.numeric(time(gdp_ts)),
+  GDP = as.numeric(gdp_ts)
+)
+```
+
+Let's Visualize our Series with ggplot2
+
+```{r}
+library(ggplot2)
+ggplot(gdp_d.f, aes(x = Year, y = GDP)) +
+  geom_line(color = "blue", linewidth = 1) +
+  labs(title = "Ghana GDP Time Series (1960–2023)",
+       x = "Year",
+       y = "GDP (in Millions)") +
+  theme_minimal()
+```
+
+Split the GDP Time Series into Training and Testing sets. We'll use 1960 - 2021 for training and then test with 2022 and 2023
+
+```{r}
+train_ts = window(gdp_ts, end = c(1960 + length(gdp_ts) - 3))
+test_ts = window(gdp_ts, start = c(1960 + length(gdp_ts) - 2))
+print(train_ts)
+print(test_ts)
+```
+
+1.  **Start the ARIMA Models process**
+
+**Differencing**\
+Here, we are determining how many times the series should be differenced to achieve stationarity
+
+```{r}
+adf.test(train_ts)  #Augmented Dickey Fuller Test for stationarity
+kpss.test(train_ts) #KPSS test for stationarity
+
+```
+
+Both tests suggest that the series is not stationary and so we have to difference it
+
+We have to determine how many times we should difference the series to make it stationary so that we can fit it to the ARIMA modelling
+
+```{r}
+ndiffs(train_ts) #number of times to difference the series
+```
+
+We have to difference the series **twice** in order to achieve stationarity.
+
+```{r}
+datadiff=diff(train_ts, differences = 2) #two order differencing
+plot(datadiff) #visualize the differenced series
+```
+
+The Autocorrelation function (ACF) and the Partial autocorrelation function (PACF) plots of the differenced series help to determine the suitable AR() and MA() orders for the best fit of the ARMA model
+
+```{r}
+acf2(datadiff) 
+```
+
+We can also use the **auto.arima** function from the **forecast** library to determine the suitable **ARIMA** model for forecasting. We use the **train_ts** series since we don't want to expose our testing (test_ts) data to the model for evaluation reasons.
+
+```{r}
+auto.arima(train_ts, seasonal = FALSE, stepwise = FALSE, approximation = FALSE)
+```
+
+It Suggests ARIMA(1,2,3), excellent correspondence with the differencing order(**I**) of " that we determined earlier.
+
+We go ahead to fit the training data series to the suggested forecasting model, ARIMA(1,2,3) using the **sarima** function from the **astsa** package.
+
+```{r}
+sarima(train_ts, 1,2,3)
+```
+
+The model fit results from the plot above reveal that our model is statistically significant and that it is suitable for forecasting based on the model residuals analysis plotted above. It fulfills the Assumptions taken for the ARIMA model residuals.\
+\
+We are good to make forecasts with our ARIMA(1,2,3) model, using the **sarima.for** function from the **astsa** package.
+
+```{r}
+fcast <- sarima.for(train_ts, 2,1,2,3)
+```
+
+Extract the forecast values from the forecast
+
+```{r}
+fcasted = fcast$pred
+print(fcasted)
+```
+
+ARIMA forecasts a GDP of 84255.56 (million USD) for 2022 and 84669.30 (million USD) for 2023.
+
+Now, we calculate evaluation metrics for the ARIMA model. We will Mean Absolute Error (MAE) and the Root Mean Square Error (RMSE) for this case.
+
+```{r}
+mae=mean(abs(fcasted - test_ts))
+rmse=sqrt(mean((fcasted - test_ts)^2))
+mae
+rmse
+```
+
+ARIMA performs with MAE of 9145.93 and RMSE of 9185.033
+
+2.  **Exponential Smoothing (ETS) Model**
+
+We use the **ets** function from the **forecast** package to fit the Error, Trend and Seasonality components of the GDP series. We use the **train_ts** series to fit the model.
+
+```{r}
+ets_model=ets(train_ts)
+ets_model
+```
+
+Our **ets()** model identifies the ETS(M,A,N) model for this series. (M,A,N) stand for Multiplicative Error, Additive Trend, No seasonality; which is great because we are dealing with annual time series data that grows exponentially(trend).\
+\
+Residual Analysis for the fitted model.\
+
+```{r}
+ggAcf(residuals(ets_model)) +
+  ggtitle("ACF of ETS Model Residuals") #ACF of the residuals
+Box.test(residuals(ets_model), lag = 10, type = "Ljung-Box") #ljung-box test of the residuals
+```
+
+\
+Both the Ljung Box Test and the AutoCorrelation function plot of the residuals fulfill the assumptions taken for proper fitting and forecasting
+
+We proceed to make forecasts using our fitted model
+
+```{r}
+ets_forecast=forecast(ets_model, h=2) #fprecast for a horizon of 2 years, 2022 and 2023
+autoplot(ets_forecast, main = "ETS Forecast for Ghana GDP", ylab = "GDP", xlab = "Year") #plot of the forecast
+```
+
+Extract the forecast values by the model
+
+```{r}
+ets_fcasted=ets_forecast$mean
+ets_fcasted
+```
+
+ETS forecasts a GDP of 83796.57 (million USD) for 2022 and 88124.21 (million USD) for 2023.
+
+We compute the evaluation metrics for the Exponential Smoothing model
+
+```{r}
+ets_mae=mean(abs(ets_fcasted - test_ts))
+ets_rmse=sqrt(mean((ets_fcasted - test_ts)^2))
+ets_mae
+ets_rmse
+```
+
+ETS performs with MAE of 10643.89 and RMSE of 10701.64
+
+3.  **Prophet Model**
+
+We start off with manipulating the annual GDP series to make it a dated time series data since Prophet works with dates and not just annual data.
+
+```{r}
+gdp_values=as.numeric(gdp_ts) #convert the series GDP values to numeric
+years=time(gdp_ts) #extract the time(years) from the series 
+years_int=floor(years) 
+df_prophet=data.frame(
+  ds = as.Date(paste0(years_int, "-12-31")),
+  y = gdp_values
+)                #a data frame for the new manupulated GDP series data with dates on years 
+df_prophet #view the new data frame
+```
+
+We split the new data frame into train and test data sets
+
+```{r}
+train_df=df_prophet[1:(nrow(df_prophet)-2), ] # the training set
+test_df=df_prophet[(nrow(df_prophet)-1):nrow(df_prophet), ] #the testing set
+```
+
+We fit the Prophet Model on the **train_df** set.
+
+```{r}
+m=prophet(train_df)
+m # model fitting details
+```
+
+We now make forecasts for the future. But first, we make a data frame to store them.
+
+```{r}
+future_df = make_future_dataframe(m, periods = 2, freq = "year") # data frame for the future forecast
+forecast_prophet = predict(m, future_df) # forecasts
+forecast_prophet
+```
+
+We perform Residual analysis for the Prophet model
+
+```{r}
+residuals_prophet <- as.numeric(train_df$y - forecast_prophet$yhat[1:nrow(train_df)])                 # residuals
+
+resid_df <- data.frame(
+  ds = as.Date(train_df$ds),   
+  residual = residuals_prophet
+)                    # residuals data frame
+
+
+```
+
+We visualize the residuals to validate the forecasting assumptions
+
+```{r}
+ggAcf(residuals_prophet, main = "ACF of Prophet Residuals") #acf plot pf residuals
+
+Box.test(residuals_prophet, lag = 10, type = "Ljung-Box") #ljung box test for residuals
+
+ggplot(resid_df, aes(x = residual)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  labs(title = "Distribution of Prophet Residuals",
+       x = "Residual", y = "Count") +
+  theme_minimal()                          # residuals histogram
+
+
+ggplot(resid_df, aes(sample = residual)) +
+  stat_qq(color = "blue") +
+  stat_qq_line(color = "red") +
+  labs(title = "QQ Plot of Prophet Residuals") +
+  theme_minimal()      # qq plot of the residuals
+
+ggplot(resid_df, aes(x = ds, y = residual)) +
+  geom_line(color = "blue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  labs(title = "Prophet Residuals Over Time",
+       x = "Date", y = "Residual (y - yhat)") +
+  theme_minimal()     #plot of model residuals over time
+
+```
+
+The residuals take on the assumptions which validates our forecasting model. We go ahead to extract the forecasts
+
+```{r}
+fcasted_prophet=tail(forecast_prophet$yhat, 2)
+fcasted_prophet
+```
+
+Prophet predicts a GDP of 80443.46 (million USD) for 2022 and a GDP of 83588.38 (million USD) for 2023.
+
+We go ahead to visualize these forecasts.
+
+```{r}
+plot(m, forecast_prophet) +
+  ggtitle("GDP Forecast Using Prophet") +
+  xlab("Years") +
+  ylab("GDP") +
+  theme_minimal()
+
+
+split_date=as.POSIXct(min(test_df$ds))
+ggplot() +
+  geom_line(data = forecast_prophet, aes(x = as.POSIXct(ds), y = yhat, color = "Forecast"), size = 1) +
+  geom_line(data = train_df, aes(x = as.POSIXct(ds), y = y, color = "Training Data"), size = 1, alpha = 0.6) +
+  geom_line(data = test_df, aes(x = as.POSIXct(ds), y = y, color = "Test Data"), size = 1) +
+  geom_vline(xintercept = split_date, linetype = "dashed", color = "gray40") +
+  labs(
+    title = "Prophet Forecast with Actual GDP Values",
+    x = "Year",
+    y = "GDP",
+    color = "Legend"
+  ) +
+  theme_minimal()
+```
+
+We go ahead to get the performance metrics for the Prophet Model
+
+```{r}
+actuals_prophet=test_df$y
+mae_prophet=mean(abs(fcasted_prophet - actuals_prophet))
+rmse_prophet=sqrt(mean((fcasted_prophet - actuals_prophet)^2))
+mae_prophet
+rmse_prophet
+```
+
+Prophet performs with MAE of 6699.417 and RMSE of 6719.487
+
+To Summarize this analysis, I create a data frame to store all the performance metrics by each model
+
+```{r}
+results = data.frame(
+  Model = c("ARIMA", "ETS", "Prophet"),
+  MAE = c(mae, ets_mae, mae_prophet),
+  RMSE = c(rmse, ets_rmse, rmse_prophet)
+)
+print(results)
+
+```
+
+To rank the models by performance, here's the ranking table.
+
+| Model   | MAE      | RMSE      |
+|---------|----------|-----------|
+| Prophet | 6699.417 | 6719.487  |
+| ARIMA   | 9145.93  | 9185.03   |
+| ETS     | 10643.89 | 10701.645 |
+
+Note that these performance metrics are based on errors made by the models from the actual GDP values and the forecast GDP by each model. The bigger the errors, the less performance by the model.\
+ETS performs worst with the biggest errors, while Prophet performs best with the smallest. This places Prophet as the best performing model in forecasting GDP related data compared to its traditional counterparts.
+
+Ghana should adopt modern machine learning forecasting models like Prophet to make more accurate forecasts to aid in making more efficient government economic plannings.\
+
+Although, this is in a government context, it can be applied well in business contexts. Businesses can adopt modern machine learning forecasting methods like Prophet to make forecasts for sales, supply, production and other business related time series variables to make more accurate predictions and plan more efficiently to make more informed business decisions.
