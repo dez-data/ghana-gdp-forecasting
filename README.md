@@ -135,7 +135,7 @@ ghana-gdp-forecasting/
 
 ---
 
-## 🚀 How to Reproduce
+## How to Reproduce
 
 ### Prerequisites
 ```r
@@ -166,7 +166,7 @@ rmarkdown::render("A Comparative Analysis of ARIMA, Exponential Smoothing and Pr
 
 ---
 
-## 📊 Data Source
+## Data Source
 
 **World Bank Open Data**
 - Indicator: NY.GDP.MKTP.CD (GDP, current US$)
@@ -190,7 +190,7 @@ Reproducible research
 
 ---
 
-## 📚 References
+## References
 
 - Hyndman, R.J., & Athanasopoulos, G. (2021). *Forecasting: Principles and Practice* (3rd ed.). OTexts.
 - Taylor, S.J., & Letham, B. (2018). Forecasting at scale. *The American Statistician*, 72(1), 37-45.
@@ -216,5 +216,6 @@ This project is open source and available under the MIT License.
 ---
 
 *Completed as part of BSc Statistics (Data Science) final year project at Kwame Nkrumah University of Science and Technology, Ghana (May - September 2025)*
+
 
 
