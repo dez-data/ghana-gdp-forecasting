@@ -1,11 +1,11 @@
-# 📊 A Comparative Analysis: ARIMA vs ETS vs Prophet in Forecasting Ghana's GDP (1960 - 2023) 
+# A Comparative Analysis: ARIMA vs ETS vs Prophet in Forecasting Ghana's GDP (1960 - 2023) 
 
 [![R](https://img.shields.io/badge/R-276DC3?style=flat&logo=r&logoColor=white)](https://www.r-project.org/)
 [![RStudio](https://img.shields.io/badge/RStudio-75AADB?style=flat&logo=rstudio&logoColor=white)](https://rstudio.com/)
 
 Time series forecasting analysis comparing ARIMA, ETS, and Prophet models using 63 years of Ghana's GDP data (1960-2023).
 
-**📄 [View Full Analysis Report (HTML)](https://dez-data.github.io/ghana-gdp-forecasting/A-Comparative-Analysis-of-ARIMA,-Exponential-Smoothing-and-Prophet-on-the-forecasting-of-Ghana-s-GDP.html)**
+**[View Full Analysis Report (HTML)](https://dez-data.github.io/ghana-gdp-forecasting/A-Comparative-Analysis-of-ARIMA,-Exponential-Smoothing-and-Prophet-on-the-forecasting-of-Ghana-s-GDP.html)**
 
 ---
 
@@ -216,3 +216,4 @@ This project is open source and available under the MIT License.
 ---
 
 *Completed as part of BSc Statistics (Data Science) final year project at Kwame Nkrumah University of Science and Technology, Ghana (May - September 2025)*
+
