@@ -20,7 +20,7 @@ This project compares three time series forecasting approaches:
 
 ---
 
-## 📈 Results Summary
+## Results Summary
 
 ### Model Performance
 
@@ -216,4 +216,5 @@ This project is open source and available under the MIT License.
 ---
 
 *Completed as part of BSc Statistics (Data Science) final year project at Kwame Nkrumah University of Science and Technology, Ghana (May - September 2025)*
+
 
