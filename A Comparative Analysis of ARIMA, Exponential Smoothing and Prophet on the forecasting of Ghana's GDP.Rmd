@@ -16,7 +16,7 @@ library(prophet)
 Loading the data
 
 ```{r}
-setwd("C:/Users/SamuelAster Agondeze/Documents")
+setwd("your working directory")   #set your working directory containing the file you want to read
 GDP_Data <- read.csv("Ghana_GDP A.csv")
 ```
 
@@ -65,8 +65,8 @@ print(test_ts)
 
 1.  **Start the ARIMA Models process**
 
-**Differencing**\
-Here, we are determining how many times the series should be differenced to achieve stationarity
+**Checking for Stationarity/Differencing**\
+Here, we are determining how many times the series should be differenced to achieve stationarity, but first, we check for stationarity with two tests
 
 ```{r}
 adf.test(train_ts)  #Augmented Dickey Fuller Test for stationarity
@@ -101,7 +101,7 @@ We can also use the **auto.arima** function from the **forecast** library to det
 auto.arima(train_ts, seasonal = FALSE, stepwise = FALSE, approximation = FALSE)
 ```
 
-It Suggests ARIMA(1,2,3), excellent correspondence with the differencing order(**I**) of " that we determined earlier.
+It Suggests ARIMA(1,2,3), excellent correspondence with the differencing order(**I**) of 2 that we determined earlier.
 
 We go ahead to fit the training data series to the suggested forecasting model, ARIMA(1,2,3) using the **sarima** function from the **astsa** package.
 
@@ -337,3 +337,4 @@ ETS performs worst with the biggest errors, while Prophet performs best with the
 Ghana should adopt modern machine learning forecasting models like Prophet to make more accurate forecasts to aid in making more efficient government economic plannings.\
 
 Although, this is in a government context, it can be applied well in business contexts. Businesses can adopt modern machine learning forecasting methods like Prophet to make forecasts for sales, supply, production and other business related time series variables to make more accurate predictions and plan more efficiently to make more informed business decisions.
+
