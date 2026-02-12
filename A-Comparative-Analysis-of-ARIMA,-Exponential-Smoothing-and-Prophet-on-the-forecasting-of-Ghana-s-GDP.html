@@ -381,7 +381,7 @@ library(forecast)</code></pre>
 <pre><code>## Warning: package &#39;Rcpp&#39; was built under R version 4.2.3</code></pre>
 <pre><code>## Loading required package: rlang</code></pre>
 <p>Loading the data</p>
-<pre class="r"><code>setwd(&quot;C:/Users/SamuelAster Agondeze/Documents&quot;)
+<pre class="r"><code>setwd(&quot;your working directory&quot;) #Set your working directory containing the file you want to read
 GDP_Data &lt;- read.csv(&quot;Ghana_GDP A.csv&quot;)</code></pre>
 <p>Converting the loaded GDP data into a Time Series (ts) data type</p>
 <pre class="r"><code>gdp_ts=ts(GDP_Data$gdp, start=c(1960,1), frequency=1)
@@ -439,9 +439,8 @@ print(train_ts)</code></pre>
 <ol style="list-style-type: decimal">
 <li><strong>Start the ARIMA Models process</strong></li>
 </ol>
-<p><strong>Differencing</strong><br />
-Here, we are determining how many times the series should be differenced
-to achieve stationarity</p>
+<p><strong>Checking for Stationarity/Differencing</strong><br />
+Here, we are determining how many times the series should be differenced to achieve stationarity, but first, we check for stationarity with two tests.</p>
 <pre class="r"><code>adf.test(train_ts)  #Augmented Dickey Fuller Test for stationarity</code></pre>
 <pre><code>## Warning in adf.test(train_ts): p-value greater than printed p-value</code></pre>
 <pre><code>## 
@@ -496,7 +495,7 @@ testing (test_ts) data to the model for evaluation reasons.</p>
 ## sigma^2 = 12564114:  log likelihood = -575.27
 ## AIC=1160.54   AICc=1161.65   BIC=1171.01</code></pre>
 <p>It Suggests ARIMA(1,2,3), excellent correspondence with the
-differencing order(<strong>I</strong>) of ” that we determined
+differencing order(<strong>I</strong>) of 2 that we determined
 earlier.</p>
 <p>We go ahead to fit the training data series to the suggested
 forecasting model, ARIMA(1,2,3) using the <strong>sarima</strong>
@@ -1533,3 +1532,4 @@ $(document).ready(function () {
 
 </body>
 </html>
+
